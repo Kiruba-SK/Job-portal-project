@@ -21,9 +21,13 @@ from django.contrib.auth.hashers import make_password,check_password
 # --------JOB views---------
 
 class JobViewSet(viewsets.ModelViewSet):
-    queryset = Job.objects.all()
     serializer_class = JobSerializer
-
+    
+    def get_queryset(self):
+        company_id = self.request.query_params.get('company_id')
+        if company_id:
+            return Job.objects.filter(company__pk=company_id)  
+        return Job.objects.all()
 
 # --------APPLICATION POST-----------
 
