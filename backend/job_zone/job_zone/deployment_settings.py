@@ -40,10 +40,10 @@ STORAGES = {
     }
 }
 
-# Database configuration
-DATABASES = {
-    'default' : dj_database_url.config(
-        default = os.environ['DATABASE_URL'],
-        conn_max_age = 600
-    )
-}
+# # Database configuration
+# DATABASES = {
+#     'default' : dj_database_url.config(
+#         default = os.environ['DATABASE_URL'],
+#         conn_max_age = 600
+#     )
+# }
