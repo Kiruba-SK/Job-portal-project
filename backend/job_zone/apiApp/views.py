@@ -198,7 +198,9 @@ def create_user(request):
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'User created'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            print("Signup serializer errors:", serializer.errors)  
+            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
         import traceback

@@ -13,15 +13,35 @@ const RecruiterLogin = ({ onClose }) => {
   const [isTextDataSubmited, setIsTextDataSubmited] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const validateInputs = () => {
+    if (!email.includes("@")) {
+      toast.error("Enter a valid email address");
+      return false;
+    }
+    if ((forgotPassword ? newPassword : password).length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return false;
+    }
+    return true;
+  };
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    if (loading) return;
 
-    // Handle Password Reset
-    if (forgotPassword) {
-      try {
-        await AxiosInstance.post("/reset-password/", {
+    if (!validateInputs()) return;
+
+    setLoading(true);
+
+    try {
+      let response, data;
+
+      // Handle Password Reset
+      if (forgotPassword) {
+        response = await AxiosInstance.post("/reset-password/", {
           email,
           new_password: newPassword,
         });
@@ -31,21 +51,17 @@ const RecruiterLogin = ({ onClose }) => {
         setEmail("");
         setNewPassword("");
         setState("Login");
-      } catch (error) {
-        console.error(error);
-        toast.error("Error resetting password");
+        setLoading(false);
+
+        return;
       }
-      return;
-    }
 
-    // Handle Sign Up Step 1
-    if (state === "Sign Up" && !isTextDataSubmited) {
-      setIsTextDataSubmited(true);
-      return;
-    }
-
-    try {
-      let response, data;
+      // Handle Sign Up Step 1
+      if (state === "Sign Up" && !isTextDataSubmited) {
+        setIsTextDataSubmited(true);
+        setLoading(false);
+        return;
+      }
 
       if (state === "Login") {
         response = await AxiosInstance.post("/login/", { email, password });
@@ -55,15 +71,17 @@ const RecruiterLogin = ({ onClose }) => {
         toast.success(data.message || "Login successful!");
         navigate("/dashboard");
       } else {
-        // SIGN UP API
+        if (!image) {
+          toast.error("Please upload your company logo");
+          setLoading(false);
+          return;
+        }
+
         const formData = new FormData();
         formData.append("company_name", name);
         formData.append("email", email);
         formData.append("password", password);
-
-        if (image) {
-          formData.append("image", image);
-        }
+        formData.append("image", image);
 
         response = await AxiosInstance.post("/sign-up/", formData, {
           headers: {
@@ -71,14 +89,17 @@ const RecruiterLogin = ({ onClose }) => {
           },
         });
         data = response.data;
+
         if (response.status === 201 || response.status === 200) {
           toast.success(data.message || "Account created successfully!");
-          setState("Login"); 
+          setState("Login");
           setIsTextDataSubmited(false);
           setName("");
           setEmail("");
           setPassword("");
           setImage(false);
+          const fileInput = document.getElementById("image");
+          if (fileInput) fileInput.value = null;
         } else {
           toast.error(data.error || data.message || "Sign up failed");
         }
@@ -86,16 +107,17 @@ const RecruiterLogin = ({ onClose }) => {
     } catch (error) {
       console.error("Signup/Login Error: ", error);
       if (error.response && error.response.data) {
-        toast.error(error.response.data.error || "Server error.");
+        const { error: errorMsg, message } = error.response.data;
+        toast.error(errorMsg || message || "Something went wrong.");
       } else {
-        toast.error("Server error. Try again later.");
+        toast.error("Network/server error. Please try again later.");
       }
     }
+    setLoading(false);
   };
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
-
     return () => {
       document.body.style.overflow = "unset";
     };
@@ -224,9 +246,14 @@ const RecruiterLogin = ({ onClose }) => {
         {/* SUBMIT BUTTON */}
         <button
           type="submit"
-          className="bg-blue-600 w-full text-white py-2 mt-5 rounded-full"
+          disabled={loading}
+          className={`bg-blue-600 w-full text-white py-2 mt-5 rounded-full ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
-          {forgotPassword
+          {loading
+            ? "Please wait..."
+            : forgotPassword
             ? "Reset Password"
             : state === "Login"
             ? "Login"

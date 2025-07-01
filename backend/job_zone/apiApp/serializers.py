@@ -7,7 +7,10 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = ['_id', 'company_name', 'email', 'password', 'image']
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'image': {'required': True}
+        }
 
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])
