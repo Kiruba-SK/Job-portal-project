@@ -65,7 +65,7 @@ const RecruiterLogin = ({ onClose }) => {
 
       if (state === "Login") {
         response = await AxiosInstance.post("/login/", { email, password });
-        data = response.data;
+        const data = response.data;
 
         localStorage.setItem("recruiter", JSON.stringify(data.recruiter));
         toast.success(data.message || "Login successful!");
@@ -88,10 +88,9 @@ const RecruiterLogin = ({ onClose }) => {
             "Content-Type": "multipart/form-data",
           },
         });
-        data = response.data;
 
         if (response.status === 201 || response.status === 200) {
-          toast.success(data.message || "Account created successfully!");
+          toast.success("Account created successfully!");
           setState("Login");
           setIsTextDataSubmited(false);
           setName("");
@@ -101,7 +100,7 @@ const RecruiterLogin = ({ onClose }) => {
           const fileInput = document.getElementById("image");
           if (fileInput) fileInput.value = null;
         } else {
-          toast.error(data.error || data.message || "Sign up failed");
+          toast.error("Sign up failed");
         }
       }
     } catch (error) {
