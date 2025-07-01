@@ -3,6 +3,7 @@ import { assets } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AxiosInstance from "./AxiosInstance";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const RecruiterLogin = ({ onClose }) => {
   const [state, setState] = useState("Login");
@@ -173,10 +174,10 @@ const RecruiterLogin = ({ onClose }) => {
                 required
               />
               <span
-                className="text-xs cursor-pointer text-gray-500"
+                className="cursor-pointer text-gray-500 hover:text-gray-800"
                 onClick={() => setShowNewPassword((prev) => !prev)}
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ?  <FaEyeSlash /> : <FaEye />}
               </span>
             </div>
           </>
@@ -246,10 +247,10 @@ const RecruiterLogin = ({ onClose }) => {
                 required
               />
               <span
-                className="text-xs cursor-pointer text-gray-500"
+                className="cursor-pointer text-gray-500 hover:text-gray-800"
                 onClick={() => setShowPassword((prev) => !prev)}
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ?  <FaEyeSlash /> : <FaEye />}
               </span>
             </div>
           </>
