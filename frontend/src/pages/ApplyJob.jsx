@@ -9,6 +9,7 @@ import moment from "moment";
 import JobCard from "../components/JobCard";
 import Footer from "../components/Footer";
 import { toast } from "react-toastify";
+import AxiosInstance from "../components/AxiosInstance";
 
 const ApplyJob = () => {
   const { user, isSignedIn } = useUser();
@@ -44,15 +45,9 @@ const ApplyJob = () => {
         resume: resumeURL,
       };
 
-      const response = await fetch("http://localhost:8000/apply/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error("Failed to apply");
+      const response = await AxiosInstance.post("/apply/", payload);
+      const data = response.data;
+      // if (!response.ok) throw new Error("Failed to apply");
 
       toast.success("Application submitted!");
       setHasApplied(true);
@@ -65,9 +60,8 @@ const ApplyJob = () => {
   // Fetch specific job by ID
   const fetchJobById = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/jobs/${id}/`);
-      if (!res.ok) throw new Error("Failed to fetch job");
-      const data = await res.json();
+      const res = await AxiosInstance.get(`/jobs/${id}/`);
+      const data = await res.data;
       setJobData(data);
     } catch (err) {
       console.error("Error fetching job:", err);
@@ -77,9 +71,9 @@ const ApplyJob = () => {
   // Fetch all jobs for 'related jobs' section
   const fetchAllJobs = async () => {
     try {
-      const res = await fetch("http://localhost:8000/jobs/");
-      if (!res.ok) throw new Error("Failed to fetch jobs");
-      const data = await res.json();
+      const res = await AxiosInstance.get("/jobs/");
+      // if (!res.ok) throw new Error("Failed to fetch jobs");
+      const data = await res.data;
       setAllJobs(data);
     } catch (err) {
       console.error("Error fetching all jobs:", err);
@@ -90,16 +84,17 @@ const ApplyJob = () => {
     if (!user || !jobData) return;
 
     try {
-      const res = await fetch(
-        `http://localhost:8000/user-resume/?email=${user.primaryEmailAddress.emailAddress}`
-      );
-      const data = await res.json();
+      const res = await AxiosInstance.get(`/user-resume/`, {
+        params: { email: user.primaryEmailAddress.emailAddress },
+      });
+      const data = await res.data;
       setResumeURL(data?.resume || null);
 
-      const appsRes = await fetch(
-        `http://localhost:8000/user-applications/?email=${user.primaryEmailAddress.emailAddress}`
-      );
-      const apps = await appsRes.json();
+      const appsRes = await AxiosInstance.get(`/user-applications/`, {
+        params: { email: user.primaryEmailAddress.emailAddress },
+      });
+
+      const apps = await appsRes.data;
 
       if (apps.some((app) => app.job._id === jobData._id)) {
         toast.info("You've already applied for this job.");

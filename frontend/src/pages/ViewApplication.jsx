@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { assets } from "../assets/assets";
 import { MoreVertical } from "lucide-react";
 import { toast } from "react-toastify";
+import AxiosInstance from "../components/AxiosInstance";
 
 const ViewApplication = () => {
   const [applications, setApplications] = useState([]);
@@ -10,26 +11,22 @@ const ViewApplication = () => {
 
   const handleStatusChange = async (appId, newStatus) => {
     try {
-      const res = await fetch(
-        "http://localhost:8000/update-application-status/",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ application_id: appId, status: newStatus }),
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to update status");
-
-      // Update state locally
-      setApplications((prev) =>
-        prev.map((app) =>
-          app.id === appId ? { ...app, status: newStatus } : app
-        )
-      );
-      setDropdownVisible(null);
+      const res = await AxiosInstance.patch("/update-application-status/", {
+        application_id: appId,
+        status: newStatus,
+      });
+      const data = res.data;
+      if (res.status === 200) {
+        setApplications((prev) =>
+          prev.map((app) =>
+            app.id === appId ? { ...app, status: newStatus } : app
+          )
+        );
+        toast.success(`Application ${newStatus}`);
+        setDropdownVisible(null);
+      } else {
+        toast.error(data?.error || "Failed to update application status.");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to update application status.");
@@ -56,16 +53,14 @@ const ViewApplication = () => {
 
       try {
         const companyEmail = JSON.parse(recruiterData).email;
-        const res = await fetch(
-          `http://localhost:8000/company-applications/?email=${companyEmail}`
+        const res = await AxiosInstance.get(
+          `/company-applications/?email=${companyEmail}`
         );
 
-        if (!res.ok) throw new Error("Failed to fetch");
-
-        const data = await res.json();
-        setApplications(data);
+        setApplications(res.data);
       } catch (err) {
         console.error("Failed to load applications", err);
+        toast.error("Failed to load applications.");
       }
     };
 
@@ -178,4 +173,3 @@ const ViewApplication = () => {
 };
 
 export default ViewApplication;
-

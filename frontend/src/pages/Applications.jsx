@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useUser } from "@clerk/clerk-react";
 import Navbar from "../components/Navbar";
 import { assets } from "../assets/assets";
 import moment from "moment";
 import Footer from "../components/Footer";
 import { toast } from "react-toastify";
-
-const BACKEND_BASE_URL = "http://127.0.0.1:8000";
+import AxiosInstance from "../components/AxiosInstance";
 
 const Applications = () => {
   const [isEdit, setIsEdit] = useState(false);
@@ -18,15 +17,17 @@ const Applications = () => {
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
+    if (!user?.primaryEmailAddress?.emailAddress) return;
+
     setLoading(true);
     try {
-      const res = await fetch(
-        `${BACKEND_BASE_URL}/user-applications/?email=${user.primaryEmailAddress.emailAddress}`
-      );
-      const data = await res.json();
+      const res = await AxiosInstance.get(`/user-applications/`, {
+        params: { email: user.primaryEmailAddress.emailAddress },
+      });
+      const data = res.data;
 
-      if (res.ok && Array.isArray(data)) {
+      if (Array.isArray(data)) {
         setApplications(data);
       } else {
         setApplications([]);
@@ -38,31 +39,29 @@ const Applications = () => {
       setApplications([]);
     }
     setLoading(false);
-  };
+  }, [user]);
 
-  const fetchUserResume = async () => {
+  const fetchUserResume = useCallback(async () => {
+    if (!user?.primaryEmailAddress?.emailAddress) return;
+
     try {
-      const res = await fetch(
-        `${BACKEND_BASE_URL}/user-resume/?email=${user.primaryEmailAddress.emailAddress}`
-      );
-      const data = await res.json();
-      if (res.ok && data?.resume) {
-        setResumeUrl(data.resume);
-      } else {
-        setResumeUrl(null);
-      }
+      const res = await AxiosInstance.get(`/user-resume/`, {
+        params: { email: user.primaryEmailAddress.emailAddress },
+      });
+      const data = res.data;
+      setResumeUrl(data?.resume || null);
     } catch (err) {
       console.error("Error fetching user resume:", err);
       setResumeUrl(null);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user?.primaryEmailAddress?.emailAddress) {
       fetchApplications();
       fetchUserResume();
     }
-  }, [user]);
+  }, [user, fetchApplications, fetchUserResume]);
 
   const handleSaveResume = async () => {
     if (!resume) {
@@ -75,27 +74,15 @@ const Applications = () => {
     formData.append("email", user.primaryEmailAddress.emailAddress);
 
     try {
-      const res = await fetch(`${BACKEND_BASE_URL}/upload-resume/`, {
-        method: "POST",
-        body: formData,
+      await AxiosInstance.post(`/upload-resume/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
-
-      const text = await res.text();
-      try {
-        const data = JSON.parse(text);
-
-        if (!res.ok) {
-          throw new Error(data.error || "Upload failed");
-        }
-
-        toast.success("Resume uploaded successfully!");
-        setIsEdit(false);
-        setResume(null);
-        await fetchUserResume();
-      } catch (err) {
-        console.error("Upload error (maybe HTML):", text);
-        toast.error("Unexpected server response.");
-      }
+      toast.success("Resume uploaded successfully!");
+      setIsEdit(false);
+      setResume(null);
+      await fetchUserResume();
     } catch (err) {
       console.error("Error uploading resume:", err);
       toast.error(err.message || "Error uploading resume");
@@ -108,7 +95,7 @@ const Applications = () => {
     }, 10000); // 10 seconds
 
     return () => clearInterval(interval);
-  }, [user]);
+  }, [fetchApplications]);
 
   return (
     <>

@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
 // Determine if we're in development mode
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = process.env.NODE_ENV === "development";
 
 // Choose the correct base URL based on environment
 const myBaseUrl = isDevelopment
@@ -12,8 +12,8 @@ const AxiosInstance = axios.create({
   baseURL: myBaseUrl,
   timeout: 5000,
   headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
+    "Content-Type": "application/json",
+    Accept: "application/json",
   },
 });
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+import AxiosInstance from "../components/AxiosInstance";
+import { toast } from "react-toastify";
 
 const ManageJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -9,40 +11,51 @@ const ManageJobs = () => {
 
   useEffect(() => {
     const rec = JSON.parse(localStorage.getItem("recruiter") || "{}");
-    if (!rec._id) return alert("Please login");
+    if (!rec._id) {
+      toast.error("Please login as recruiter.");
+      navigate("/");
+      return;
+    }
 
-    fetch(`http://127.0.0.1:8000/jobs/?company_id=${rec._id}`)
-      .then((r) => r.json())
-      .then(setJobs)
-      .catch(console.error);
+    // Fetch jobs by recruiter
+    AxiosInstance.get(`/jobs/?company_id=${rec._id}`)
+      .then((res) => setJobs(res.data))
+      .catch((err) => {
+        console.error(err);
+        toast.error("Failed to fetch jobs.");
+      });
 
-    fetch(`http://localhost:8000/company-applications/?email=${rec.email}`)
-      .then((res) => res.json())
-      .then(setApplications)
-      .catch(console.error);
-  }, []);
+    // Fetch company applications by email
+    AxiosInstance.get(`/company-applications/?email=${rec.email}`)
+      .then((res) => setApplications(res.data))
+      .catch((err) => {
+        console.error(err);
+        toast.error("Failed to fetch applications.");
+      });
+  }, [navigate]);
 
   const getApplicationCount = (jobId) => {
     return applications.filter((app) => app.job?._id === jobId).length;
   };
 
-  const handleVisibilityToggle = (jobId, currentVisible) => {
-    fetch(`http://127.0.0.1:8000/jobs/${jobId}/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ visible: !currentVisible }),
-    })
-      .then((res) => res.json())
-      .then((updatedJob) => {
-        setJobs((prevJobs) =>
-          prevJobs.map((job) =>
-            job._id === jobId ? { ...job, visible: updatedJob.visible } : job
-          )
-        );
-      })
-      .catch(console.error);
+  const handleVisibilityToggle = async (jobId, currentVisible) => {
+    try {
+      const res = await AxiosInstance.patch(`/jobs/${jobId}/`, {
+        visible: !currentVisible,
+      });
+      const updatedJob = res.data;
+
+      setJobs((prevJobs) =>
+        prevJobs.map((job) =>
+          job._id === jobId ? { ...job, visible: updatedJob.visible } : job
+        )
+      );
+
+      toast.success("Visibility updated!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update visibility.");
+    }
   };
 
   return (
@@ -64,26 +77,41 @@ const ManageJobs = () => {
             </tr>
           </thead>
           <tbody>
-            {jobs.map((job, index) => (
-              <tr key={job._id} className="text-gray-700">
-                <td className="py-2 px-4 border-b max-sm:hidden">
-                  {index + 1}
-                </td>
-                <td className="py-2 px-4 border-b">{job.title}</td>
-                <td className="py-2 px-4 border-b max-sm:hidden">
-                  {moment(job.date).format("YYYY-MM-DD")}
-                </td>
-                <td className="py-2 px-4 border-b max-sm:hidden">
-                  {job.location}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  {getApplicationCount(job._id)}
-                </td>
-                <td className="py-2 px-4 border-b">
-                  <input className="scale-125 ml-4" type="checkbox" checked={job.visible} onChange={() => handleVisibilityToggle(job._id, job.visible)}/>
+            {jobs.length > 0 ? (
+              jobs.map((job, index) => (
+                <tr key={job._id} className="text-gray-700">
+                  <td className="py-2 px-4 border-b max-sm:hidden">
+                    {index + 1}
+                  </td>
+                  <td className="py-2 px-4 border-b">{job.title}</td>
+                  <td className="py-2 px-4 border-b max-sm:hidden">
+                    {moment(job.date).format("YYYY-MM-DD")}
+                  </td>
+                  <td className="py-2 px-4 border-b max-sm:hidden">
+                    {job.location}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    {getApplicationCount(job._id)}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <input
+                      className="scale-125 ml-4"
+                      type="checkbox"
+                      checked={job.visible}
+                      onChange={() =>
+                        handleVisibilityToggle(job._id, job.visible)
+                      }
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center py-4 text-gray-500">
+                  No applications found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

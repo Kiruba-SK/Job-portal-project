@@ -3,6 +3,7 @@ import Quill from "quill";
 import { useNavigate } from "react-router-dom";
 import { JobCategories, JobLocations } from "../assets/assets";
 import { toast } from "react-toastify";
+import AxiosInstance from "../components/AxiosInstance";
 
 const AddJob = () => {
   const [title, setTitle] = useState("");
@@ -14,7 +15,7 @@ const AddJob = () => {
 
   const editorRef = useRef(null);
   const quillRef = useRef(null);
- 
+
   useEffect(() => {
     // Initiate Quill only once
     if (!quillRef.current && editorRef.current) {
@@ -53,25 +54,15 @@ const AddJob = () => {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/jobs/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(jobData),
-      });
+      await AxiosInstance.post("/jobs/", jobData);
 
-      const data = await response.json();
-      if (response.ok) {
-        toast.success("Job created successfully!");
-        navigate("/dashboard");
-      } else {
-        console.error("Error:", data);
-        toast.error(data.error || "Failed to post job");
-      }
+      toast.success("Job created successfully!");
+      navigate("/dashboard");
     } catch (err) {
       console.error("Error:", err);
-      toast.error("Network or server error");
+      toast.error(
+        err.response?.data?.error || "Failed to post job. Please try again."
+      );
     }
   };
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { assets } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import AxiosInstance from "./AxiosInstance";
 
 const RecruiterLogin = ({ onClose }) => {
   const [state, setState] = useState("Login");
@@ -20,28 +21,19 @@ const RecruiterLogin = ({ onClose }) => {
     // Handle Password Reset
     if (forgotPassword) {
       try {
-        const response = await fetch("http://127.0.0.1:8000/reset-password/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, new_password: newPassword }),
+        await AxiosInstance.post("/reset-password/", {
+          email,
+          new_password: newPassword,
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-          toast.success("Password reset successful!");
-          setForgotPassword(false);
-          setEmail("");
-          setNewPassword("");
-          setState("Login");
-        } else {
-          toast.error(data.error || "Something went wrong");
-        }
+        toast.success("Password reset successful!");
+        setForgotPassword(false);
+        setEmail("");
+        setNewPassword("");
+        setState("Login");
       } catch (error) {
         console.error(error);
-        toast.info("Server error. Try again later.");
+        toast.error("Error resetting password");
       }
       return;
     }
@@ -53,26 +45,15 @@ const RecruiterLogin = ({ onClose }) => {
     }
 
     try {
-      let response;
-      let data;
+      let response, data;
 
       if (state === "Login") {
-        response = await fetch("http://127.0.0.1:8000/login/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        });
-        data = await response.json();
+        response = await AxiosInstance.post("/login/", { email, password });
+        data = response.data;
 
-        if (response.ok) {
-          localStorage.setItem("recruiter", JSON.stringify(data.recruiter));
-          toast.success(data.message || "Login successful!");
-          navigate("/dashboard");
-        } else {
-          toast.error(data.error || data.message || "Invalid credentials");
-        }
+        localStorage.setItem("recruiter", JSON.stringify(data.recruiter));
+        toast.success(data.message || "Login successful!");
+        navigate("/dashboard");
       } else {
         // SIGN UP API
         const formData = new FormData();
@@ -84,14 +65,13 @@ const RecruiterLogin = ({ onClose }) => {
           formData.append("image", image);
         }
 
-        response = await fetch("http://127.0.0.1:8000/sign-up/", {
-          method: "POST",
-          body: formData,
+        response = await AxiosInstance.post("/sign-up/", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
-
-        data = await response.json();
-
-        if (response.ok) {
+        data = response.data;
+        if (response.status === 201 || response.status === 200) {
           toast.success(data.message || "Account created successfully!");
           setState("Login"); // ✅ Go to login page after successful signup
           setIsTextDataSubmited(false);
@@ -100,12 +80,16 @@ const RecruiterLogin = ({ onClose }) => {
           setPassword("");
           setImage(false);
         } else {
-          toast.error(data.error || data.message || "Something went wrong");
+          toast.error(data.error || data.message || "Sign up failed");
         }
       }
     } catch (error) {
-      console.error(error);
-      toast.info("Server error. Try again later.");
+      console.error("Signup/Login Error: ", error);
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.error || "Server error.");
+      } else {
+        toast.error("Server error. Try again later.");
+      }
     }
   };
 

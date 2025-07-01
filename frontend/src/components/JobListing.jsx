@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { assets, JobCategories, JobLocations } from "../assets/assets";
 import JobCard from "./JobCard";
+import AxiosInstance from "./AxiosInstance";
 
 const JobListing = ({ searchFilter, isSearched, onClearFilter }) => {
   const [jobs, setJobs] = useState([]);
@@ -12,9 +13,9 @@ const JobListing = ({ searchFilter, isSearched, onClearFilter }) => {
 
   // Fetch jobs on mount
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/jobs/")
-      .then((res) => res.json())
-      .then((data) => {
+    AxiosInstance.get("/jobs/")
+      .then((res) => {
+        const data = res.data;
         const visibleJobs = data.filter((job) => job.visible);
         setJobs(visibleJobs);
         setFilteredJobs(visibleJobs.slice().reverse());
@@ -215,4 +216,3 @@ const JobListing = ({ searchFilter, isSearched, onClearFilter }) => {
 };
 
 export default JobListing;
-

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { assets } from "../assets/assets";
 import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -28,10 +28,7 @@ const Navbar = ({ onShowRecruiterLogin }) => {
           </div>
         ) : (
           <div className="flex gap-4 max-sm:text-xs">
-            <button
-              onClick={onShowRecruiterLogin}
-              className="text-gray-600"
-            >
+            <button onClick={onShowRecruiterLogin} className="text-gray-600">
               Recruiter Login
             </button>
             <button
