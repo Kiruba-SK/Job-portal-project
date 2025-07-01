@@ -15,6 +15,8 @@ const RecruiterLogin = ({ onClose }) => {
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   const validateInputs = () => {
     if (!email.includes("@")) {
@@ -109,9 +111,17 @@ const RecruiterLogin = ({ onClose }) => {
       const errData = error.response?.data;
       console.error("Signup error:", status, errData);
 
-      if (status === 400) toast.error(errData.error);
-      else if (status === 404) toast.error("Signup endpoint not found");
-      else toast.error("Network/server error. Please try again later.");
+      if (status === 400) {
+        toast.error(errData?.error || "Invalid input.");
+      } else if (status === 401) {
+        toast.error(errData?.error || "Invalid credentials.");
+      } else if (status === 404) {
+        toast.error("Endpoint not found.");
+      } else if (error.code === "ECONNABORTED") {
+        toast.error("Request timed out. Try again.");
+      } else {
+        toast.error("Network/server error. Please try again later.");
+      }
     }
     setLoading(false);
   };
@@ -158,10 +168,16 @@ const RecruiterLogin = ({ onClose }) => {
                 className="outline-none text-sm"
                 onChange={(e) => setNewPassword(e.target.value)}
                 value={newPassword}
-                type="password"
+                type={showNewPassword ? "text" : "password"}
                 placeholder="New Password"
                 required
               />
+              <span
+                className="text-xs cursor-pointer text-gray-500"
+                onClick={() => setShowNewPassword((prev) => !prev)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </span>
             </div>
           </>
         )}
@@ -225,10 +241,16 @@ const RecruiterLogin = ({ onClose }) => {
                 className="outline-none text-sm"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 required
               />
+              <span
+                className="text-xs cursor-pointer text-gray-500"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </span>
             </div>
           </>
         )}
