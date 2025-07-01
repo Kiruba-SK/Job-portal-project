@@ -25,15 +25,15 @@ MIDDLEWARE = [
     
 ]
 
-# # CORS configuration
-# CORS_ALLOWED_ORIGINS = [
-#     "https://e-commerce-frontend-dd1x.onrender.com",
-# ]
+# CORS configuration
+CORS_ALLOWED_ORIGINS = [
+    "https://job-portal-frontend-ob9g.onrender.com",
+]
 
 # Static and media file storage
 STORAGES = {
     "default":{
-        "BACKEND" : "django.core.files.storage.FileSystemStorage",
+        "BACKEND" : "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
         "BACKEND" : "whitenoise.storage.CompressedStaticFilesStorage"
