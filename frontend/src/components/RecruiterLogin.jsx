@@ -73,7 +73,7 @@ const RecruiterLogin = ({ onClose }) => {
         data = response.data;
         if (response.status === 201 || response.status === 200) {
           toast.success(data.message || "Account created successfully!");
-          setState("Login"); // ✅ Go to login page after successful signup
+          setState("Login"); 
           setIsTextDataSubmited(false);
           setName("");
           setEmail("");

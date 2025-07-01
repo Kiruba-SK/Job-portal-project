@@ -186,16 +186,23 @@ class UserResumeRetrieveAPIView(APIView):
 def create_user(request):
     try:
         email = request.data.get('email')
+        password = request.data.get('password')
+
         if Company.objects.filter(email=email).exists():
             return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
+        data = request.data.copy()
+        data['password'] = make_password(password)
+
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()  # Will call your model.save(), which hashes password
+            serializer.save()
             return Response({'message': 'User created'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
+        import traceback
+        print("SIGNUP ERROR:", traceback.format_exc())
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
