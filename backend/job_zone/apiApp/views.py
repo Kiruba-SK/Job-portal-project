@@ -221,7 +221,6 @@ def login(request):
                     "_id": company._id,
                     "company_name": company.company_name,
                     "email": company.email,
-                    # "password": password,
                     "image": request.build_absolute_uri(company.image.url) if company.image else "" 
                 }
             }, status=status.HTTP_200_OK)
