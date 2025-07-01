@@ -40,7 +40,7 @@ const RecruiterLogin = ({ onClose }) => {
     setLoading(true);
 
     try {
-      let response, data;
+      let response;
 
       // Handle Password Reset
       if (forgotPassword) {

@@ -11,6 +11,7 @@ const Applications = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [resume, setResume] = useState(null);
   const [resumeUrl, setResumeUrl] = useState(null);
+  const [resumeName, setResumeName] = useState("");
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [applications, setApplications] = useState([]);
@@ -29,6 +30,7 @@ const Applications = () => {
 
       if (Array.isArray(data)) {
         setApplications(data);
+        setError("");
       } else {
         setApplications([]);
         setError("Unexpected response from server");
@@ -50,6 +52,10 @@ const Applications = () => {
       });
       const data = res.data;
       setResumeUrl(data?.resume || null);
+      if (data?.resume) {
+        const urlParts = data.resume.split("/");
+        setResumeName(urlParts[urlParts.length - 1]);
+      }
     } catch (err) {
       console.error("Error fetching user resume:", err);
       setResumeUrl(null);
@@ -81,21 +87,22 @@ const Applications = () => {
       });
       toast.success("Resume uploaded successfully!");
       setIsEdit(false);
-      setResume(null);
       await fetchUserResume();
+      setResume(null);
     } catch (err) {
       console.error("Error uploading resume:", err);
       toast.error(err.message || "Error uploading resume");
     }
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchApplications();
-    }, 10000); // 10 seconds
+  const handleResumeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setResume(file);
+      setResumeName(file.name);
+    }
+  };
 
-    return () => clearInterval(interval);
-  }, [fetchApplications]);
 
   return (
     <>
@@ -110,23 +117,17 @@ const Applications = () => {
                 htmlFor="resumeUpload"
               >
                 <p className="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg mr-2">
-                  Select Resume
+                  {resumeName ? resumeName : "Select Resume"}
                 </p>
                 <input
                   id="resumeUpload"
-                  onChange={(e) => setResume(e.target.files[0])}
+                  onChange={handleResumeChange}
                   accept="application/pdf"
                   type="file"
                   hidden
                 />
                 <img src={assets.profile_upload_icon} alt="" />
               </label>
-
-              {resume && (
-                <span className="text-sm text-gray-600 mt-1">
-                  {resume.name}
-                </span>
-              )}
 
               <button
                 onClick={handleSaveResume}

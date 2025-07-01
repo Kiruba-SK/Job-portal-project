@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useParams } from "react-router-dom";
 import Loading from "../components/Loading";
@@ -45,9 +45,7 @@ const ApplyJob = () => {
         resume: resumeURL,
       };
 
-      const response = await AxiosInstance.post("/apply/", payload);
-      const data = response.data;
-      // if (!response.ok) throw new Error("Failed to apply");
+      await AxiosInstance.post("/apply/", payload);
 
       toast.success("Application submitted!");
       setHasApplied(true);
@@ -58,7 +56,7 @@ const ApplyJob = () => {
   };
 
   // Fetch specific job by ID
-  const fetchJobById = async () => {
+  const fetchJobById = useCallback(async () => {
     try {
       const res = await AxiosInstance.get(`/jobs/${id}/`);
       const data = await res.data;
@@ -66,7 +64,7 @@ const ApplyJob = () => {
     } catch (err) {
       console.error("Error fetching job:", err);
     }
-  };
+  }, [id]);
 
   // Fetch all jobs for 'related jobs' section
   const fetchAllJobs = async () => {
@@ -78,9 +76,9 @@ const ApplyJob = () => {
     } catch (err) {
       console.error("Error fetching all jobs:", err);
     }
-  };
+  }
 
-  const fetchResume = async () => {
+  const fetchResume = useCallback(async () => {
     if (!user || !jobData) return;
 
     try {
@@ -98,17 +96,18 @@ const ApplyJob = () => {
 
       if (apps.some((app) => app.job._id === jobData._id)) {
         toast.info("You've already applied for this job.");
+        setHasApplied(true);
         return;
       }
     } catch (err) {
       console.error("Failed to fetch resume", err);
     }
-  };
+  }, [user, jobData]);
 
   useEffect(() => {
     fetchJobById();
     fetchAllJobs();
-  }, [id]);
+  }, [fetchJobById]);
 
   useEffect(() => {
     if (jobData && allJobs.length > 0) {
@@ -126,7 +125,7 @@ const ApplyJob = () => {
     if (isSignedIn && user && jobData) {
       fetchResume();
     }
-  }, [user, isSignedIn, jobData]);
+  }, [isSignedIn, user, jobData, fetchResume]);
 
   if (!jobData) return <Loading />;
 
