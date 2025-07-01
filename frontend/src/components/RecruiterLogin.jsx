@@ -90,7 +90,8 @@ const RecruiterLogin = ({ onClose }) => {
         });
 
         if (response.status === 201 || response.status === 200) {
-          toast.success("Account created successfully!");
+          const msg = response.data?.message || "Account created successfully!";
+          toast.success(msg);
           setState("Login");
           setIsTextDataSubmited(false);
           setName("");
@@ -104,13 +105,13 @@ const RecruiterLogin = ({ onClose }) => {
         }
       }
     } catch (error) {
-      console.error("Signup/Login Error: ", error);
-      if (error.response && error.response.data) {
-        const { error: errorMsg, message } = error.response.data;
-        toast.error(errorMsg || message || "Something went wrong.");
-      } else {
-        toast.error("Network/server error. Please try again later.");
-      }
+      const status = error.response?.status;
+      const errData = error.response?.data;
+      console.error("Signup error:", status, errData);
+
+      if (status === 400) toast.error(errData.error);
+      else if (status === 404) toast.error("Signup endpoint not found");
+      else toast.error("Network/server error. Please try again later.");
     }
     setLoading(false);
   };

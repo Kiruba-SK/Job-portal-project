@@ -194,17 +194,14 @@ def create_user(request):
         data = request.data.copy()
         data['password'] = make_password(password)
 
-        serializer = CompanySerializer(data=request.data)
+        serializer = CompanySerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'User created'}, status=status.HTTP_201_CREATED)
         else:
-            print("Signup serializer errors:", serializer.errors)  
             return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
-        import traceback
-        print("SIGNUP ERROR:", traceback.format_exc())
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -250,6 +247,3 @@ def reset_password(request):
         return Response({'message': 'Password reset successful'})
     except Company.DoesNotExist:
         return Response({'error': 'Email not found'}, status=404)
-
-
-

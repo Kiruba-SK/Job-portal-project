@@ -13,7 +13,7 @@ router.register(r'jobs', JobViewSet, basename='jobs')
 
 urlpatterns = [
     path('login/', login,name='login'),
-    path('sign-up/', create_user,name='sign-up'),
+    path('sign-up/', create_user,name='create_user'),
     path('reset-password/', reset_password, name='reset-password'),
     path('', include(router.urls)),
     path('apply/', ApplyToJobView.as_view(), name='apply-to-job'),
