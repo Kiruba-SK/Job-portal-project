@@ -154,7 +154,7 @@ class UploadResumeAPIView(APIView):
             
             upload_result = cloudinary.uploader.upload(
                 resume_file,
-                resource_type="auto",
+                resource_type="raw",
                 folder="resumes/",
                 public_id=f"{email.replace('@', '_at_')}_resume",
                 overwrite=True
