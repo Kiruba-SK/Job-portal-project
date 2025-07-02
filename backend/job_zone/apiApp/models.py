@@ -49,7 +49,7 @@ class Application(models.Model):
 
 class UserResume(models.Model):
     email = models.EmailField(unique=True)
-    resume = models.FileField(upload_to='resumes/')
+    resume = models.URLField()
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

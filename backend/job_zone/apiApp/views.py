@@ -10,10 +10,13 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
 import logging
 from rest_framework.parsers import JSONParser
+import cloudinary.uploader
 
 from apiApp.models import Company, Job, Application, UserResume
 from apiApp.serializers import CompanySerializer, JobSerializer, ApplicationSerializer, ResumeUploadSerializer
 from django.contrib.auth.hashers import make_password,check_password
+
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -96,19 +99,12 @@ class CompanyApplicationsList(generics.ListAPIView):
 
     def get_queryset(self):
         company_email = self.request.query_params.get('email')
-        print("Fetching applications for company:", company_email)
-
         if company_email:
             # Get jobs for the company
             company = Company.objects.filter(email=company_email).first()
-            print("Found company:", company)
-
             if company:
                 jobs = Job.objects.filter(company=company)
-                print("Found jobs:", jobs)
-
                 applications = Application.objects.filter(job__in=jobs)
-                print("Applications found:", applications)
                 return applications
         return Application.objects.none()
 
@@ -142,43 +138,62 @@ class UpdateApplicationStatusAPIView(APIView):
 
 # -------- RESUME UPLOAD --------
 
-logger = logging.getLogger(__name__)
-
 class UploadResumeAPIView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, *args, **kwargs):
         try:
             email = request.data.get('email')
-            resume = request.FILES.get('resume')
+            resume_file = request.FILES.get('resume') 
 
-            if not email or not resume:
-                return Response({'error': 'Email and resume are required.'}, status=status.HTTP_400_BAD_REQUEST)
+            if not email:
+                return Response({'error': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            user_resume, created = UserResume.objects.update_or_create(
-                email=email,
-                defaults={'resume': resume}
+            if not resume_file:
+                return Response({'error': 'No resume file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            upload_result = cloudinary.uploader.upload(
+                resume_file,
+                resource_type="auto",
+                folder="resumes/",
+                public_id=f"{email.replace('@', '_at_')}_resume",
+                overwrite=True
             )
 
-            return Response({'message': 'Resume uploaded successfully'}, status=status.HTTP_200_OK)
+            resume_url = upload_result.get("secure_url")
+            if not resume_url:
+                return Response({'error': 'Failed to upload resume to Cloudinary.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            UserResume.objects.update_or_create(
+                email=email,
+                defaults={'resume': resume_url}
+            )
+
+            return Response({
+                'message': 'Resume uploaded successfully',
+                'resume': resume_url
+            }, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.error(f"UploadResumeAPIView error: {str(e)}", exc_info=True)
-            return Response({'error': 'Server error. Please check backend logs.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print("Upload failed:", e)
+            logger.error(f"Upload error: {e}", exc_info=True)
+            return Response({'error': 'Upload failed.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserResumeRetrieveAPIView(APIView):
     def get(self, request):
         email = request.query_params.get('email')
         if not email:
-            return Response({'error': 'Email parameter is required.'}, status=400)
+            return Response({'error': 'Email required.'}, status=400)
 
         try:
             user_resume = UserResume.objects.get(email=email)
-            resume_url = request.build_absolute_uri(user_resume.resume.url)
-            return Response({'email': email, 'resume': resume_url}, status=200)
+            return Response({
+                'email': email,
+                'resume': user_resume.resume
+            }, status=200)
         except UserResume.DoesNotExist:
-            return Response({'error': 'Resume not found for this user.'}, status=404)
+            return Response({'error': 'Resume not found.'}, status=404)
 
 
 @api_view(['POST'])
