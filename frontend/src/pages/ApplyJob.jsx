@@ -27,12 +27,12 @@ const ApplyJob = () => {
     }
 
     if (!resumeURL) {
-      toast.error("Please upload your resume in the Applications tab first.");
+      toast.error("Please upload your resume first.");
       return;
     }
 
     if (hasApplied) {
-      toast.info("You've already applied for this job.");
+      toast.info("Already applied for this job.");
       return;
     }
 
@@ -76,7 +76,7 @@ const ApplyJob = () => {
     } catch (err) {
       console.error("Error fetching all jobs:", err);
     }
-  }
+  };
 
   const fetchResume = useCallback(async () => {
     if (!user || !jobData) return;
@@ -170,12 +170,21 @@ const ApplyJob = () => {
             </div>
 
             <div className="flex flex-col justify-center text-end text-sm max-md:mx-auto max-md:text-center">
-              <button
-                onClick={handleApply}
-                className="bg-blue-600 p-2.5 px-10 text-white rounded"
-              >
-                Apply Now
-              </button>
+              {hasApplied ? (
+                <button
+                  disabled
+                  className="bg-green-600 p-2.5 px-10 text-white rounded cursor-not-allowed"
+                >
+                  Applied
+                </button>
+              ) : (
+                <button
+                  onClick={handleApply}
+                  className="bg-blue-600 p-2.5 px-10 text-white rounded"
+                >
+                  Apply Now
+                </button>
+              )}
               <p className="mt-2 mr-2 text-gray-600">
                 Posted {moment(jobData.date).fromNow()}
               </p>
@@ -190,12 +199,21 @@ const ApplyJob = () => {
                 dangerouslySetInnerHTML={{ __html: jobData.description }}
               ></div>
 
-              <button
-                onClick={handleApply}
-                className="bg-blue-600 p-2.5 px-10 text-white rounded lg:mt-10 mt-6"
-              >
-                Apply Now
-              </button>
+              {hasApplied ? (
+                <button
+                  disabled
+                  className="bg-green-600 p-2.5 px-10 text-white rounded cursor-not-allowed"
+                >
+                  Applied
+                </button>
+              ) : (
+                <button
+                  onClick={handleApply}
+                  className="bg-blue-600 p-2.5 px-10 text-white rounded"
+                >
+                  Apply Now
+                </button>
+              )}
             </div>
 
             {/* Right Section More Jobs */}
