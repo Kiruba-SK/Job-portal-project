@@ -40,7 +40,7 @@ class Application(models.Model):
     user_name = models.CharField(max_length=100, null=True, blank=True)
     user_img = models.URLField(null=True, blank=True)    
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
-    resume = models.FileField(upload_to='resumes/')
+    resume = models.URLField() 
     status = models.CharField(max_length=10, default='Pending')  
     applied_at = models.DateTimeField(auto_now_add=True)
 
