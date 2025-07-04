@@ -6,6 +6,7 @@ import moment from "moment";
 import Footer from "../components/Footer";
 import { toast } from "react-toastify";
 import AxiosInstance from "../components/AxiosInstance";
+import Loading from "../components/Loading";
 
 const Applications = () => {
   const [isEdit, setIsEdit] = useState(false);
@@ -90,7 +91,9 @@ const Applications = () => {
     }
   };
 
-
+  const filteredApps = applications.filter(
+    (app) => statusFilter === "All" || app.status === statusFilter
+  );
 
   return (
     <>
@@ -116,12 +119,6 @@ const Applications = () => {
                 />
                 <img src={assets.profile_upload_icon} alt="" />
               </label>
-
-              {/* {resume && (
-                <span className="text-sm text-gray-600 mt-1">
-                  {resume.name}
-                </span>
-              )} */}
 
               <button
                 onClick={handleSaveResume}
@@ -170,9 +167,12 @@ const Applications = () => {
         </div>
         {error && <p className="text-red-500 font-medium mb-4">{error}</p>}
         {loading ? (
-          <p className="text-center py-4">Loading applications...</p>
+          <div>
+            <Loading />
+            <p className="text-center py-4">Loading applications...</p>
+          </div>
         ) : (
-          <table className="min-w-full border bg-white mt-6 rounded-lg ">
+          <table className="min-w-full border bg-white mt-12 rounded-lg ">
             <thead>
               <tr>
                 <th className="py-3 px-4 border-b text-left">Company</th>
@@ -187,50 +187,43 @@ const Applications = () => {
               </tr>
             </thead>
             <tbody>
-              {applications.length > 0 ? (
-                applications
-                  .filter(
-                    (app) =>
-                      statusFilter === "All" || app.status === statusFilter
-                  )
-                  .map((app, index) => (
-                    <tr key={index}>
-                      <td className="py-3 px-4 flex items-center gap-2 border-b">
-                        <img
-                          className="w-8 h-8 "
-                          src={
-                            app.job?.company?.image || "/default-company.png"
-                          }
-                          alt=""
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "/default-company.png";
-                          }}
-                        />
-                        {app.job?.company?.company_name || "Unknown"}
-                      </td>
-                      <td className="py-2 px-4 border-b">{app.job?.title}</td>
-                      <td className="py-2 px-4 border-b max-sm:hidden">
-                        {app.job?.location}
-                      </td>
-                      <td className="py-2 px-4 border-b max-sm:hidden">
-                        {moment(app.applied_at).format("ll")}
-                      </td>
-                      <td className="py-2 px-4 border-b">
-                        <span
-                          className={`${
-                            app.status === "Accepted"
-                              ? "bg-green-100"
-                              : app.status === "Rejected"
-                              ? "bg-red-100"
-                              : "bg-blue-100"
-                          } px-4 py-1.5 rounded`}
-                        >
-                          {app.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+              {filteredApps.length > 0 ? (
+                filteredApps.map((app, index) => (
+                  <tr key={index}>
+                    <td className="py-3 px-4 flex items-center gap-2 border-b">
+                      <img
+                        className="w-8 h-8 "
+                        src={app.job?.company?.image || "/default-company.png"}
+                        alt=""
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "/default-company.png";
+                        }}
+                      />
+                      {app.job?.company?.company_name || "Unknown"}
+                    </td>
+                    <td className="py-2 px-4 border-b">{app.job?.title}</td>
+                    <td className="py-2 px-4 border-b max-sm:hidden">
+                      {app.job?.location}
+                    </td>
+                    <td className="py-2 px-4 border-b max-sm:hidden">
+                      {moment(app.applied_at).format("ll")}
+                    </td>
+                    <td className="py-2 px-4 border-b">
+                      <span
+                        className={`${
+                          app.status === "Accepted"
+                            ? "bg-green-100"
+                            : app.status === "Rejected"
+                            ? "bg-red-100"
+                            : "bg-blue-100"
+                        } px-4 py-1.5 rounded`}
+                      >
+                        {app.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
               ) : (
                 <tr>
                   <td colSpan="5" className="text-center py-4 text-gray-500">

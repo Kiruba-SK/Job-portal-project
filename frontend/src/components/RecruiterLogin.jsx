@@ -117,7 +117,7 @@ const RecruiterLogin = ({ onClose }) => {
       } else if (status === 401) {
         toast.error(errData?.error || "Invalid credentials.");
       } else if (status === 404) {
-        toast.error("Endpoint not found.");
+        toast.error("User does not exist");
       } else if (error.code === "ECONNABORTED") {
         toast.error("Request timed out. Try again.");
       } else {

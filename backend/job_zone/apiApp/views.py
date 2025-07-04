@@ -205,7 +205,7 @@ def create_user(request):
         password = request.data.get('password')
 
         if Company.objects.filter(email=email).exists():
-            return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'User already exists'}, status=400)
 
         data = request.data.copy()
         data['password'] = make_password(password)
@@ -213,9 +213,9 @@ def create_user(request):
         serializer = CompanySerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'User created'}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'User created'}, status=201)
         else:
-            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': serializer.errors}, status=400)
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
