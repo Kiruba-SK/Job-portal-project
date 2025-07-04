@@ -42,9 +42,7 @@ const Dashboard = () => {
             alt="Logo"
           />
           <div className="flex items-center gap-3">
-            <p className="max-sm:hidden">
-              Welcome, {recruiter.company_name || "Recruiter"}
-            </p>
+            <p>Welcome, {recruiter.company_name || "Recruiter"}</p>
             <div className="relative group">
               <img
                 className="w-8 h-8 object-cover rounded-full border cursor-pointer"
@@ -72,38 +70,54 @@ const Dashboard = () => {
           <ul className="flex flex-col items-start pt-5 text-gray-800">
             <NavLink
               className={({ isActive }) =>
-                `flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
+                `group relative flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
                   isActive && "bg-blue-100 border-r-4 border-blue-500"
                 }`
               }
               to={"/dashboard/manage-jobs"}
             >
-              <img className="min-w-4" src={assets.home_icon} alt="" />
-              <p>Manage Jobs</p>
+              <div className="relative group">
+                <img className="min-w-4" src={assets.home_icon} alt="" />
+                {/* Tooltip for small screens */}
+                <span className="absolute left-10 top-1/2 -translate-y-1/2 bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap hidden group-hover:block sm:hidden z-50">
+                  Manage Jobs
+                </span>
+              </div>
+              <p className="max-sm:hidden">Manage Jobs</p>
             </NavLink>
 
             <NavLink
               className={({ isActive }) =>
-                `flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
+                `group relative flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
                   isActive && "bg-blue-100 border-r-4 border-blue-500"
                 }`
               }
               to={"/dashboard/add-job"}
             >
-              <img className="min-w-4" src={assets.add_icon} alt="" />
+              <div className="relative group">
+                <img className="min-w-4" src={assets.add_icon} alt="" />
+                <span className="absolute left-10 top-1/2 -translate-y-1/2 bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap hidden group-hover:block sm:hidden z-50">
+                  Add Job
+                </span>
+              </div>
               <p className="max-sm:hidden ">Add Job</p>
             </NavLink>
 
             <NavLink
               className={({ isActive }) =>
-                `flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
+                `roup relative flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
                   isActive && "bg-blue-100 border-r-4 border-blue-500"
                 }`
               }
               to={"/dashboard/view-applications"}
             >
-              <img className="min-w-4" src={assets.person_tick_icon} alt="" />
-              <p>View Application</p>
+              <div className="relative group">
+                <img className="min-w-4" src={assets.person_tick_icon} alt="" />
+                <span className="absolute left-10 top-1/2 -translate-y-1/2 bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap hidden group-hover:block sm:hidden z-50">
+                  View Applications
+                </span>
+              </div>{" "}
+              <p className="max-sm:hidden">View Application</p>
             </NavLink>
           </ul>
         </div>

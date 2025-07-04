@@ -68,17 +68,17 @@ const ViewApplication = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-8">
-      <div>
-        <table className="w-full max-w-4xl bg-white border border-gray-200 max-sm:text-sm">
+    <div className="container max-w-5xl p-8">
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200 max-sm:text-sm">
           <thead>
-            <tr className="border-b">
-              <th className="py-2 px-4 text-left">#</th>
-              <th className="py-2 px-4 text-left">User name</th>
-              <th className="py-2 px-4 text-left max-sm:hidden">Job Title</th>
-              <th className="py-2 px-4 text-left max-sm:hidden">Location</th>
-              <th className="py-2 px-4 text-left">Resume</th>
-              <th className="py-2 px-4 text-left">Action</th>
+            <tr >
+              <th className="py-2 px-4 border-b text-left">#</th>
+              <th className="py-2 px-4 border-b text-left">User name</th>
+              <th className="py-2 px-4 border-b text-left max-sm:hidden">Job Title</th>
+              <th className="py-2 px-4 border-b text-left max-sm:hidden">Location</th>
+              <th className="py-2 px-4 border-b text-left">Resume</th>
+              <th className="py-2 px-4 border-b text-left">Action</th>
             </tr>
           </thead>
           <tbody>

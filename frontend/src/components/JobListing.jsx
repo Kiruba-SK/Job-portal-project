@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { assets, JobCategories, JobLocations } from "../assets/assets";
 import JobCard from "./JobCard";
+import Loading from "./Loading"
 import AxiosInstance from "./AxiosInstance";
 
 const JobListing = ({ searchFilter, isSearched, onClearFilter }) => {
@@ -10,17 +11,25 @@ const JobListing = ({ searchFilter, isSearched, onClearFilter }) => {
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   // Fetch jobs on mount
   useEffect(() => {
-    AxiosInstance.get("/jobs/")
-      .then((res) => {
+     const fetchJobs = async () => {
+      setLoading(true); // ✅ Start loading
+      try {
+        const res = await AxiosInstance.get("/jobs/");
         const data = res.data;
         const visibleJobs = data.filter((job) => job.visible);
         setJobs(visibleJobs);
         setFilteredJobs(visibleJobs.slice().reverse());
-      })
-      .catch((err) => console.error("Failed to fetch jobs:", err));
+      } catch (err) {
+        console.error("Failed to fetch jobs:", err);
+      }
+      setLoading(false); // ✅ End loading
+    };
+
+    fetchJobs();
   }, []);
 
   // Apply filters
@@ -158,57 +167,66 @@ const JobListing = ({ searchFilter, isSearched, onClearFilter }) => {
         <h3 className="font-medium text-3xl py-2" id="job-list">
           Latest Jobs
         </h3>
-        <p className="mb-8">Get your desired job from top companies</p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filteredJobs
-            .slice((currentPage - 1) * 6, currentPage * 6)
-            .map((job, index) => (
-              <JobCard key={index} job={job} />
-            ))}
-        </div>
-
-        {/* Pagination */}
-        {filteredJobs.length > 0 && (
-          <div className="flex items-center justify-center space-x-2 mt-10">
-            <a href="#job-list">
-              <img
-                onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
-                src={assets.left_arrow_icon}
-                alt=""
-              />
-            </a>
-            {Array.from({ length: Math.ceil(filteredJobs.length / 6) }).map(
-              (_, index) => (
-                <a key={index} href="#job-list">
-                  <button
-                    onClick={() => setCurrentPage(index + 1)}
-                    className={`w-10 h-10 flex items-center justify-center border border-gray-300 rounded ${
-                      currentPage === index + 1
-                        ? "bg-blue-100 text-blue-500"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                </a>
-              )
-            )}
-            <a href="#job-list">
-              <img
-                onClick={() =>
-                  setCurrentPage(
-                    Math.min(
-                      currentPage + 1,
-                      Math.ceil(filteredJobs.length / 6)
-                    )
-                  )
-                }
-                src={assets.right_arrow_icon}
-                alt=""
-              />
-            </a>
+        <p className="mb-8">Get your desired job from top companies</p> {/* ✅ Loading State */}
+        {loading ? (
+          <Loading />
+        ) : filteredJobs.length === 0 ? (
+          <div className="text-center text-gray-600 mt-24 text-lg border-2 p-14">
+            No jobs found for your search  ❌
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filteredJobs
+                .slice((currentPage - 1) * 6, currentPage * 6)
+                .map((job, index) => (
+                  <JobCard key={index} job={job} />
+                ))}
+            </div>
+
+            {/* Pagination */}
+            {filteredJobs.length > 0 && (
+              <div className="flex items-center justify-center space-x-2 mt-10">
+                <a href="#job-list">
+                  <img
+                    onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+                    src={assets.left_arrow_icon}
+                    alt=""
+                  />
+                </a>
+                {Array.from({ length: Math.ceil(filteredJobs.length / 6) }).map(
+                  (_, index) => (
+                    <a key={index} href="#job-list">
+                      <button
+                        onClick={() => setCurrentPage(index + 1)}
+                        className={`w-10 h-10 flex items-center justify-center border border-gray-300 rounded ${
+                          currentPage === index + 1
+                            ? "bg-blue-100 text-blue-500"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    </a>
+                  )
+                )}
+                <a href="#job-list">
+                  <img
+                    onClick={() =>
+                      setCurrentPage(
+                        Math.min(
+                          currentPage + 1,
+                          Math.ceil(filteredJobs.length / 6)
+                        )
+                      )
+                    }
+                    src={assets.right_arrow_icon}
+                    alt=""
+                  />
+                </a>
+              </div>
+            )}
+          </>
         )}
       </section>
     </div>
