@@ -68,7 +68,7 @@ const AddJob = () => {
 
   return (
     <form
-      className="conatiner p-8 flex flex-col w-full items-start gap-3"
+      className="conatiner p-4 sm:p-8 flex flex-col w-full items-start gap-3 text-sm sm:text-base"
       onSubmit={handleAddJob}
     >
       <div className="w-full">

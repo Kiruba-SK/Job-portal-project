@@ -20,17 +20,15 @@ const ManageJobs = () => {
     // Fetch jobs by recruiter
     AxiosInstance.get(`/jobs/?company_id=${rec._id}`)
       .then((res) => setJobs(res.data))
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
         toast.error("Failed to fetch jobs.");
       });
 
     // Fetch company applications by email
     AxiosInstance.get(`/company-applications/?email=${rec.email}`)
       .then((res) => setApplications(res.data))
-      .catch((err) => {
-        console.error(err);
-        toast.error("Failed to fetch applications.");
+      .catch(() => {
+         toast.error("Failed to fetch applications.");
       });
   }, [navigate]);
 
@@ -52,62 +50,61 @@ const ManageJobs = () => {
       );
 
       toast.success("Visibility updated!");
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to update visibility.");
     }
   };
 
   return (
-    <div className="container p-8 max-w-5xl">
+    <div className="container  max-w-5xl p-4 sm:p-8">
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 max-sm:text-sm">
+        <table className="min-w-full bg-white border border-gray-200 text-sm sm:text-base">
           <thead>
             <tr>
-              <th className="py-2 px-4 border-b text-left max-sm:hidden">#</th>
+              <th className="py-2 px-4 border-b hidden sm:table-cell text-left">#</th>
               <th className="py-2 px-4 border-b text-left">Job Title</th>
-              <th className="py-2 px-4 border-b text-left max-sm:hidden">
+              <th className="py-2 px-4 border-b hidden sm:table-cell text-left">
                 Date
               </th>
-              <th className="py-2 px-4 border-b text-left max-sm:hidden">
+              <th className="py-2 px-4 border-b hidden sm:table-cell text-left">
                 Location
               </th>
               <th className="py-2 px-4 border-b text-center">Applications</th>
-              <th className="py-2 px-4 border-b text-left">Visible</th>
+              <th className="py-2 px-4 border-b text-center">Visible</th>
             </tr>
           </thead>
           <tbody>
             {jobs.length > 0 ? (
               jobs.map((job, index) => (
                 <tr key={job._id} className="text-gray-700">
-                  <td className="py-2 px-4 border-b max-sm:hidden">
+                  <td className="py-2 px-4 border-b hidden sm:table-cell ">
                     {index + 1}
                   </td>
-                  <td className="py-2 px-4 border-b">{job.title}</td>
-                  <td className="py-2 px-4 border-b max-sm:hidden">
+                  <td className="py-2 px-4 border-b ">{job.title}</td>
+                  <td className="py-2 px-4 border-b hidden sm:table-cell ">
                     {moment(job.date).format("YYYY-MM-DD")}
                   </td>
-                  <td className="py-2 px-4 border-b max-sm:hidden">
+                  <td className="py-2 px-4 border-b hidden sm:table-cell ">
                     {job.location}
                   </td>
                   <td className="py-2 px-4 border-b text-center">
                     {getApplicationCount(job._id)}
                   </td>
-                  <td className="py-2 px-4 border-b">
+                  <td className="py-2 px-4 border-b text-center">
                     <input
-                      className="scale-125 ml-4"
                       type="checkbox"
                       checked={job.visible}
                       onChange={() =>
                         handleVisibilityToggle(job._id, job.visible)
                       }
+                      className="scale-110 ml-2"
                     />
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center py-4 text-gray-500">
+                <td colSpan="6" className="text-center py-4 text-gray-500">
                   No applications found.
                 </td>
               </tr>
