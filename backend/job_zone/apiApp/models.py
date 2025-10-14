@@ -39,13 +39,16 @@ class Application(models.Model):
     user_email = models.EmailField(null=True, blank=True) 
     user_name = models.CharField(max_length=100, null=True, blank=True)
     user_img = models.URLField(null=True, blank=True)    
-    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True)
     resume = models.URLField() 
     status = models.CharField(max_length=10, default='Pending')  
     applied_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user_email} - {self.job.title}"
+        job_title = self.job.title if self.job else "No Job"
+        user_email = self.user_email or "Unknown User"
+        return f"{user_email} - {job_title}"
+    
 
 class UserResume(models.Model):
     email = models.EmailField(unique=True)
