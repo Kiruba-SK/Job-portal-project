@@ -35,16 +35,17 @@ class JobAdmin(admin.ModelAdmin):
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user_email', 'job', 'status', 'applied_at', 'resume_link')
+    list_display = ('user_email', 'job', 'status', 'applied_at', 'resume_link')
     search_fields = ('user_email', 'job__title', 'status')
     list_filter = ('status', 'applied_at')
     readonly_fields = ('applied_at',)
 
     def resume_link(self, obj):
         if obj.resume:
-            return format_html("<a href='{}' target='_blank'>Download</a>", obj.resume.url)
+            return format_html("<a href='{}' target='_blank'>Download</a>", obj.resume)
         return "-"
     resume_link.short_description = 'Resume'
+    
     
 @admin.register(UserResume)
 class UserResumeAdmin(admin.ModelAdmin):
