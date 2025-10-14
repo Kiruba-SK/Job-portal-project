@@ -36,7 +36,7 @@ class JobAdmin(admin.ModelAdmin):
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
     list_display = ('id', 'user_email', 'job', 'status', 'applied_at', 'resume_link')
-    search_fields = ('user__email', 'job__title', 'status')
+    search_fields = ('user_email', 'job__title', 'status')
     list_filter = ('status', 'applied_at')
     readonly_fields = ('applied_at',)
 
