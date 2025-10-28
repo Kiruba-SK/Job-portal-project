@@ -5,7 +5,10 @@ from .settings import BASE_DIR
 
 # Allowed hosts and CSRF settings
 ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
-CSRF_TRUSTED_ORGINS = ['https://'+os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
+CSRF_TRUSTED_ORGINS = [
+    'https://jobzone-red.vercel.app',
+    'https://'+os.environ.get('RENDER_EXTERNAL_HOSTNAME'),
+]
 
 # Production settings
 DEBUG = False
@@ -27,7 +30,7 @@ MIDDLEWARE = [
 
 # CORS configuration
 CORS_ALLOWED_ORIGINS = [
-    "https://job-portal-frontend-ob9g.onrender.com",
+    "https://jobzone-red.vercel.app",
 ]
 
 # Static and media file storage
